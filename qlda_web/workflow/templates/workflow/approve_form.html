@@ -1,0 +1,19 @@
+{% extends 'workflow/base.html' %}
+{% load user_filters %}
+{% block content %}
+<h4>Xác nhận: {{ task.title }}</h4>
+<form method="post">{% csrf_token %}
+  <div class="mb-2">
+    <label>Trạng thái</label>
+    <select name="status" class="form-select">
+      <option value="APPROVED">Duyệt</option>
+      <option value="REJECTED">Không duyệt</option>
+    </select>
+  </div>
+  <div class="mb-2">
+    <label>Ghi chú</label>
+    <textarea name="note" class="form-control"></textarea>
+  </div>
+  <button class="btn btn-dark">Xác nhận</button>
+</form>
+{% endblock %}

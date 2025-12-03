@@ -1,0 +1,163 @@
+{% extends 'workflow/base.html' %}
+{% block title %}Chi tiết công việc{% endblock %}
+
+{% block content %}
+
+<div class="container mt-4" style="max-width: 900px;">
+  <div class="card shadow-sm border-0 rounded-3">
+    <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center pt-3 pb-3">
+      <h5 class="fw-semibold text-primary mb-0">
+        <i class="bi bi-journal-text"></i> {{ task.title }}
+      </h5>
+    </div>
+
+    <div class="card-body p-4">
+
+      <h6 class="fw-semibold text-muted">Mô tả công việc</h6>
+      <div class="p-3 bg-light rounded-3 mb-3">
+        {{ task.description|linebreaks|default:"(Không có mô tả)" }}
+      </div>
+
+      <div class="row">
+        <div class="col-md-6">
+          <dl class="row">
+            
+            <dt class="col-sm-5">Người thực hiện:</dt>
+            <dd class="col-sm-7">
+              {% if task.assignee %}
+                {{ task.assignee.get_full_name|default:task.assignee.username }}
+              {% else %}
+                <span class="text-muted fst-italic">(Chưa gán)</span>
+              {% endif %}
+            </dd>
+            <dt class="col-sm-5">Trạng thái:</dt>
+            <dd class="col-sm-7">
+              {% if task.status == 'NEW' %}
+                <span class="badge bg-secondary">{{ task.get_status_display }}</span>
+              {% elif task.status == 'DOING' %}
+                <span class="badge bg-info text-dark">{{ task.get_status_display }}</span>
+              {% elif task.status == 'DONE' %}
+                <span class="badge bg-primary">{{ task.get_status_display }}</span>
+              {% elif task.status == 'EVAL' %}
+                <span class="badge bg-warning text-dark">{{ task.get_status_display }}</span>
+              {% elif task.status == 'APPROVED' %}
+                <span class="badge bg-success">{{ task.get_status_display }}</span>
+              {% else %}
+                <span class="badge bg-light text-dark">{{ task.get_status_display }}</span>
+              {% endif %}
+            </dd>
+
+            <dt class="col-sm-5">Loại công việc:</dt>
+            <dd class="col-sm-7">{{ task.get_type_display }}</dd>
+          </dl>
+        </div>
+        <div class="col-md-6">
+          <dl class="row">
+            <dt class="col-sm-5">Ưu tiên:</dt>
+            <dd class="col-sm-7">{{ task.get_priority_display }}</D>
+
+            <dt class="col-sm-5">Ngày bắt đầu:</dt>
+            <dd class="col-sm-7">{{ task.start_date|date:"d/m/Y" }}</dd>
+
+            <dt class="col-sm-5">Hạn chót:</dt>
+            <dd class="col-sm-7">{{ task.due_date|date:"d/m/Y" }}</dd>
+          </dl>
+        </div>
+      </div>
+
+      <hr>
+
+      <div class="mt-4">
+        <h6 class="fw-semibold"><i class="bi bi-paperclip"></i> Minh chứng đã nộp ({{ evidences.count }})</h6>
+        {% if evidences %}
+          <ul class="list-group list-group-flush">
+            {% for ev in evidences %}
+              <li class="list-group-item d-flex justify-content-between align-items-center px-0">
+                <div>
+                  <i class="bi bi-file-earmark-arrow-down"></i>
+                  <a href="{% url 'download_evidence' ev.id %}" target="_blank">{{ ev.file.name|cut:"evidence_files/" }}</a>
+                  <br>
+                  <small class="text-muted">Nộp bởi: {{ ev.uploader.username }} lúc {{ ev.uploaded_at|date:"H:i, d/m/Y" }}</small>
+                  {% if ev.note %}
+                    <p class="mb-0 text-muted fst-italic" style="font-size: 0.9em;">Ghi chú: {{ ev.note }}</p>
+                  {% endif %}
+                </div>
+                
+                {% if request.user == ev.uploader %}
+                  <a href="{% url 'delete_evidence' ev.id %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Bạn chắc chắn muốn xóa minh chứng này?');">
+                    <i class="bi bi-trash"></i>
+                  </a>
+                {% endif %}
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-muted fst-italic">Chưa có minh chứng nào được nộp.</p>
+        {% endif %}
+      </div>
+
+      <hr>
+
+      <div class="mt-4">
+        <h6 class="fw-semibold"><i class="bi bi-clipboard-check"></i> Lịch sử đánh giá ({{ evaluations.count }})</h6>
+        {% if evaluations %}
+          {% for eval in evaluations %}
+            <div class="card mb-2 bg-light border-0">
+              <div class="card-body p-3">
+                <p class="card-text mb-2 fst-italic">"{{ eval.comment|linebreaksbr|default:'(Không có nhận xét)' }}"</p>
+                <footer class="blockquote-footer mb-0 small">
+                  <strong>Điểm: {{ eval.score }}</strong>
+                  - bởi {{ eval.evaluator.get_full_name|default:eval.evaluator.username }}
+                  lúc {{ eval.created_at|date:"H:i, d/m/Y" }}
+                </footer>
+              </div>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p class="text-muted fst-italic">Chưa có đánh giá nào.</p>
+        {% endif %}
+      </div>
+
+
+      <div class="text-center mt-5 border-top pt-4">
+
+        {% if can_submit %}
+          <a href="{% url 'submit_evidence' task.id %}" class="btn btn-success me-2">
+            <i class="bi bi-upload"></i> Nộp minh chứng
+          </a>
+        {% endif %}
+
+        {% comment %} Dòng này đã được sửa {% endcomment %}
+        {% if can_evaluate and is_head_user %}
+          <a href="{% url 'evaluate_task' task.id %}" class="btn btn-warning me-2">
+            <i class="bi bi-star-half"></i> Đánh giá
+          </a>
+        {% endif %}
+
+        {% if can_approve %}
+          <a href="{% url 'approve_task' task.id %}" class="btn btn-primary me-2">
+            <i class="bi bi-check-circle"></i> Phê duyệt
+          </a>
+        {% endif %}
+
+        {% if request.user.is_superuser or is_head_user %}
+          <a href="{% url 'update_status' task.id %}" class="btn btn-outline-success me-2">
+            <i class="bi bi-arrow-repeat"></i> Cập nhật trạng thái
+          </a>
+          <a href="{% url 'task_edit' task.id %}" class="btn btn-outline-primary me-2">
+            <i class="bi bi-pencil-square"></i> Chỉnh sửa
+          </a>
+          <a href="{% url 'task_delete' task.id %}" class="btn btn-outline-danger me-2" onclick="return confirm('Bạn chắc chắn muốn xóa công việc này?');">
+            <i class="bi bi-trash"></i> Xóa
+          </a>
+        {% endif %}
+
+        <a href="{% url 'task_list' %}" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-left-circle"></i> Quay lại
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends 'workflow/base.html' %}
+{% block title %}Thêm công việc{% endblock %}
+{% block content %}
+<div class="container mt-4" style="max-width: 720px;">
+  <div class="card shadow-sm border-0 rounded-3">
+    <div class="card-header bg-white border-0 text-center">
+      <h5 class="fw-semibold text-primary mb-0">
+        <i class="bi bi-plus-circle"></i> Thêm công việc
+      </h5>
+    </div>
+
+    <div class="card-body">
+      <form method="post" novalidate>
+        {% csrf_token %}
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Tên công việc</label>
+          {{ form.title }}
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Loại</label>
+            {{ form.type }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Ưu tiên</label>
+            {{ form.priority }}
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Ngày bắt đầu</label>
+            {{ form.start_date }}
+          </div>
+          <div class="col-md-6 mb-3">
+            <label class="form-label fw-semibold">Hạn chót</label>
+            {{ form.due_date }}
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Mô tả</label>
+          {{ form.description }}
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label fw-semibold">Người phụ trách</label>
+          {{ form.assignee }}
+        </div>
+
+        <div class="text-center mt-4">
+          <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-save"></i> Lưu
+          </button>
+          <a href="{% url 'task_list' %}" class="btn btn-outline-secondary px-4 ms-2">
+            <i class="bi bi-x-circle"></i> Hủy
+          </a>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

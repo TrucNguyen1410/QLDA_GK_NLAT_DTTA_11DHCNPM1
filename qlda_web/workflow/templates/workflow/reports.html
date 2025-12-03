@@ -1,0 +1,91 @@
+{% extends 'workflow/base.html' %}
+{% load static %}
+
+{% block title %}Báo cáo và Thống kê{% endblock %}
+
+{% block content %}
+<div class="container mt-4" style="max-width: 900px;">
+    
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4 class="fw-semibold text-primary mb-0">
+            <i class="bi bi-bar-chart-fill"></i> Báo cáo và Thống kê
+        </h4>
+        
+        <a href="{% url 'export_tasks_excel' %}" class="btn btn-sm btn-outline-success">
+            <i class="bi bi-file-earmark-arrow-down"></i> Xuất Excel (.xlsx)
+        </a>
+        </div>
+
+    <div class="card shadow-sm border-0 rounded-3">
+        <div class="card-header bg-white border-0 pt-3 pb-3">
+            <h5 class="fw-semibold mb-0">Thống kê theo trạng thái</h5>
+        </div>
+        <div class="card-body p-4">
+            
+            <div style="max-width: 500px; margin: auto;">
+                <canvas id="statusChart"></canvas>
+            </div>
+
+            <hr class="my-4">
+
+            <div class="text-center">
+                <h5 class="fw-semibold">Tổng số công việc: {{ total }}</h5>
+                <a href="{% url 'task_list' %}" class="btn btn-outline-secondary mt-2">
+                    <i class="bi bi-list-task"></i> Xem danh sách công việc
+                </a>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const rawData = [
+        {% for item in by_status %}
+            { label: '{{ item.0 }}', count: {{ item.1 }} },
+        {% endfor %}
+    ];
+    const labels = rawData.map(item => item.label);
+    const data = rawData.map(item => item.count);
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    const statusChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Số lượng công việc',
+                data: data,
+                backgroundColor: [
+                    '#6c757d', // NEW
+                    '#0dcaf0', // DOING
+                    '#0d6efd', // DONE
+                    '#ffc107', // EVAL
+                    '#198754'  // APPROVED
+                ],
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'top',
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            let label = context.label || '';
+                            let value = context.raw || 0;
+                            let total = context.chart.getDataIndex(0).reduce((a, b) => a + b, 0);
+                            let percentage = ((value / total) * 100).toFixed(1);
+                            return `${label}: ${value} (${percentage}%)`;
+                        }
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

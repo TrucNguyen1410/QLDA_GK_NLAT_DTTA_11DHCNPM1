@@ -1,0 +1,64 @@
+{% extends 'workflow/base.html' %}
+{% load user_filters %}
+{% block title %}Danh sách công việc{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+  <h4 class="mb-0"><i class="bi bi-list-task"></i> Danh sách công việc</h4>
+  {% if user.is_superuser %}
+    <a href="{% url 'task_create' %}" class="btn btn-primary shadow-sm">
+      <i class="bi bi-plus-lg"></i> Thêm công việc
+    </a>
+  {% endif %}
+</div>
+
+<div class="card shadow-sm border-0">
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0">
+      <thead class="table-light">
+        <tr class="text-nowrap">
+          <th>Tên công việc</th>
+          <th>Loại</th>
+          <th>Ưu tiên</th>
+          <th>Trạng thái</th>
+          <th>Thời gian</th>
+          <th>Người phụ trách</th>
+          <th class="text-center">Chi tiết</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for t in tasks %}
+        <tr>
+          <td class="fw-semibold">{{ t.title }}</td>
+          <td>{{ t.get_type_display }}</td>
+          <td>{{ t.get_priority_display }}</td>
+          <td>
+            {% if t.status == 'DONE' %}
+              <span class="badge bg-success">{{ t.get_status_display }}</span>
+            {% elif t.status == 'DOING' %}
+              <span class="badge bg-warning text-dark">{{ t.get_status_display }}</span>
+            {% elif t.status == 'EVAL' %}
+              <span class="badge bg-info text-dark">{{ t.get_status_display }}</span>
+            {% else %}
+              <span class="badge bg-secondary">{{ t.get_status_display }}</span>
+            {% endif %}
+          </td>
+          <td>{{ t.start_date|date:"d/m/Y" }} → {{ t.due_date|date:"d/m/Y" }}</td>
+          <td>👤 {{ t.assignee.username }}</td>
+          <td class="text-center">
+            <a href="{% url 'task_detail' t.id %}" class="btn btn-outline-dark btn-sm">
+              <i class="bi bi-eye"></i> Xem chi tiết
+            </a>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="7" class="text-center text-muted py-4">Chưa có công việc nào.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

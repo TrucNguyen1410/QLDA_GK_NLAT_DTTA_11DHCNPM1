@@ -1,0 +1,41 @@
+I. CÀI ĐẶT MÔI TRƯỜNG (LÀM 1 LẦN ĐẦU)
+-------------------------------------------------
+1. Mở Terminal trong thư mục gốc của dự án (thư mục QLDA_WEB).
+2. Tạo môi trường ảo (virtual environment) để chứa các thư viện:
+   python -m venv .venv
+3. Kích hoạt môi trường ảo:
+   - Trên Windows:
+     .\.venv\Scripts\activate
+4. Chạy server phát triển (development server):
+   python manage.py runserver
+   - Nhập link: http://127.0.0.1:8000/ 
+
+II. TẠO CÁC LOẠI TÀI KHOẢN
+-------------------------------------------------
+A. TẠO SUPERUSER (ADMIN CAO NHẤT)
+Tạo SUPERUSER mới: python manage.py createsuperuser
+1. Superuser này có quyền truy cập trang Admin tại:
+   http://127.0.0.1:8000/admin/
+
+B. TẠO "HEAD" (TRƯỞNG BỘ MÔN) VÀ "TEACHER" (GIẢNG VIÊN)
+1. Đăng nhập vào trang Admin bằng tài khoản Superuser (đã tạo ở phần A):
+   http://127.0.0.1:8000/admin/
+2. Tạo người dùng mới (Head hoặc Teacher):
+   - Quay lại trang Admin, tìm mục "Users" (Người dùng) và nhấn "Add" (Thêm).
+   - Nhập Tên đăng nhập (ví dụ: truongbomon1 hoặc giangvien1)
+   - Nhập Mật khẩu và Xác nhận mật khẩu.
+   - Nhấn "Save".
+3. Phân quyền cho người dùng:
+   - Bạn sẽ được chuyển đến trang "Change user" (Sửa người dùng).
+   - Để tạo "Head": Tìm ô "Groups", chọn "Head" và nhấn mũi tên qua phải.
+   - Để tạo "Teacher": Bạn không cần chọn group nào (họ là user thường).
+
+III. CÁCH COI CÁC LOẠI DATABASE TRÊN MONGODB
+-------------------------------------------------
+1. Coi các user: auth_user 
+2. Coi các công việc đã tạo: workflow_task
+3. Coi các file đã được nộp: workflow_evidence
+4. Coi các đánh giá công việc: workflow_evaluation 
+
+
+
